@@ -4,9 +4,9 @@ const jwt = require('jsonwebtoken')
 const userDB = require('./user-modal')
 
 const bycrpt = require('bcryptjs')
-
-
-router.get('/users', (req, res) => {
+const restricted = require('./retricted-middleware')
+const { jwtSecret } = require('../config/secret')
+router.get('/users', restricted, (req, res) => {
     userDB.find()
     .then( result => {
         res.status(201).json(result)
@@ -37,7 +37,7 @@ router.post('/login', (req, res) => {
     .then(user => {
         if( user && bycrpt.compareSync(password, user.password)){
             const token = signToken(user)
-            res.statu(201).json({token})
+            res.status(201).json({token})
         } else {
             res.status(401).json({message: 'Invalid Credentials'})
         }
@@ -60,7 +60,7 @@ function signToken(user){
         expiresIn: '1d'
     }
 
-    return jwt.sign(payload,jwSecret, options)
+    return jwt.sign(payload, jwtSecret, options)
 }
 
 module.exports = router;
